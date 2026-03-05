@@ -1,0 +1,5 @@
+node_modules/
+Inspirações/
+tmp/
+*.log
+.DS_Store
