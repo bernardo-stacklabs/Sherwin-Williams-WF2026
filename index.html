@@ -18,47 +18,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <script>
-    (function () {
-      const BUILD = '7';
-      try {
-        const url = new URL(window.location.href);
-        const force = url.searchParams.get('forceUpdate') === '1';
-        const key = 'app_build';
-        const prev = localStorage.getItem(key);
-
-        if (force || prev !== BUILD) {
-          localStorage.setItem(key, BUILD);
-          const tasks = [];
-
-          if ('caches' in window) {
-            tasks.push(
-              caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
-            );
-          }
-
-          if ('serviceWorker' in navigator) {
-            tasks.push(
-              navigator.serviceWorker.getRegistrations().then((regs) => Promise.all(regs.map((r) => r.unregister())))
-            );
-          }
-
-          Promise.allSettled(tasks).finally(() => {
-            url.searchParams.delete('forceUpdate');
-            url.searchParams.set('v', BUILD);
-            url.searchParams.set('reload', String(Date.now()));
-            window.location.replace(url.toString());
-          });
-          return;
-        }
-
-        if (url.searchParams.get('v') !== BUILD) {
-          url.searchParams.set('v', BUILD);
-          window.location.replace(url.toString());
-        }
-      } catch (e) { }
-    })();
-  </script>
 
   <link rel="stylesheet" href="./styles.css?v=7" />
 </head>

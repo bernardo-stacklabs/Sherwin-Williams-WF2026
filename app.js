@@ -240,7 +240,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initAgenda();
   initNetworking();
   initHomeHighlights();
-  initPWAUpdate();
 });
 
 function initIcons() {
@@ -536,38 +535,3 @@ function initNetworking() {
   }
 }
 
-// ---- PWA Update Handling ----
-function initPWAUpdate() {
-  const toast = document.getElementById('update-toast');
-  const btnUpdate = document.getElementById('btn-update');
-
-  if (!toast || !btnUpdate || !('serviceWorker' in navigator)) return;
-
-  let newWorker;
-
-  navigator.serviceWorker.register('./sw.js').then(reg => {
-    reg.addEventListener('updatefound', () => {
-      newWorker = reg.installing;
-      newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          // Update available
-          toast.classList.add('show');
-        }
-      });
-    });
-  });
-
-  btnUpdate.addEventListener('click', () => {
-    if (newWorker) {
-      newWorker.postMessage({ action: 'skipWaiting' });
-    }
-  });
-
-  // Recarrega quando o SW novo assume
-  let refreshing;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (refreshing) return;
-    window.location.reload();
-    refreshing = true;
-  });
-}
