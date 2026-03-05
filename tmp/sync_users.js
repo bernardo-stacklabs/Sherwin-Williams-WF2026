@@ -49,26 +49,35 @@ async function syncUsers() {
         return;
     }
 
-    console.log(`Encontrados ${participantes.length} participantes.`);
+    console.log(`Encontrados ${participantes.length} no arquivo bruto. Deduplicando...`);
 
+    const uniqueParticipantes = new Map();
     const passwordDefault = 'Sherwin2026!';
 
     for (const p of participantes) {
-        const email = p.E_MAIL;
-        const nome = p.NOME_COMP || p.__EMPTY || 'Participante';
-        const senha = passwordDefault; // Padronizando conforme última orientação
+        const email = (p.E_MAIL || '').toLowerCase().trim();
+        const nome = (p.NOME_COMP || p.__EMPTY || 'Participante').trim();
 
         if (!email || !email.includes('@')) continue;
 
-        console.log(`Inserindo: ${email.toLowerCase()} (${nome})`);
+        // Se o e-mail já existe, mantemos o primeiro encontrado (ou o que tiver mais dados se necessário)
+        if (!uniqueParticipantes.has(email)) {
+            uniqueParticipantes.set(email, {
+                email: email,
+                password: passwordDefault,
+                name: nome
+            });
+        }
+    }
+
+    console.log(`Pronto para inserir ${uniqueParticipantes.size} participantes únicos.`);
+
+    for (const [email, userData] of uniqueParticipantes) {
+        console.log(`Inserindo: ${email} (${userData.name})`);
 
         const { error } = await supabase
             .from('users')
-            .insert({
-                email: email.toLowerCase().trim(),
-                password: senha,
-                name: nome.trim()
-            });
+            .insert(userData);
 
         if (error) {
             console.error(`Erro ao inserir ${email}:`, error.message);
