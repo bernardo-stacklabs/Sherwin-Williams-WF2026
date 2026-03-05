@@ -18,11 +18,24 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 async function syncUsers() {
     console.log('Iniciando sincronização de usuários...');
 
-    // Lendo o arquivo participantes.js
+    // 1. Limpeza total da tabela (conforme pedido pelo usuário)
+    console.log('Limpando tabela users...');
+    const { error: deleteError } = await supabase
+        .from('users')
+        .delete()
+        .neq('email', 'admin@example.com'); // Deleta tudo exceto um possível admin se houver, ou apenas .neq('id', 0) para deletar tudo
+
+    if (deleteError) {
+        console.error('Erro ao limpar tabela:', deleteError.message);
+        return;
+    }
+    console.log('Tabela limpa com sucesso.');
+
+    // 2. Lendo o arquivo participantes.js
     const filePath = path.join(__dirname, '..', 'assets', 'data', 'participantes.js');
     const fileContent = fs.readFileSync(filePath, 'utf8');
 
-    // Extraindo o array de objetos (removendo a exportação do JS para dar parse como JSON)
+    // Extraindo o array de objetos
     const jsonString = fileContent
         .replace('export const participantesData = ', '')
         .replace(/;$/, '')
@@ -32,37 +45,33 @@ async function syncUsers() {
     try {
         participantes = JSON.parse(jsonString);
     } catch (e) {
-        console.error('Erro ao processar participantes.js. Verifique o formato JSON.', e);
+        console.error('Erro ao processar participantes.js. Verificação manual necessária.', e);
         return;
     }
 
     console.log(`Encontrados ${participantes.length} participantes.`);
 
+    const passwordDefault = 'Sherwin2026!';
+
     for (const p of participantes) {
         const email = p.E_MAIL;
-        const nome = p.__EMPTY || p.NOME_COMP;
-        const senha = p.CPF ? p.CPF.toString() : 'Sherwin2026!'; // Usando CPF como senha conforme discutido
+        const nome = p.NOME_COMP || p.__EMPTY || 'Participante';
+        const senha = passwordDefault; // Padronizando conforme última orientação
 
-        if (!email || !email.includes('@')) {
-            console.warn(`Pulando participante sem e-mail válido: ${nome}`);
-            continue;
-        }
+        if (!email || !email.includes('@')) continue;
 
-        console.log(`Sincronizando: ${email} (${nome})`);
+        console.log(`Inserindo: ${email.toLowerCase()} (${nome})`);
 
-        // Upsert na tabela users baseada no email
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('users')
-            .upsert({
-                email: email.toLowerCase(),
+            .insert({
+                email: email.toLowerCase().trim(),
                 password: senha,
-                name: nome
-            }, { onConflict: 'email' });
+                name: nome.trim()
+            });
 
         if (error) {
-            console.error(`Erro ao sincronizar ${email}:`, error.message);
-        } else {
-            console.log(`Sucesso: ${email}`);
+            console.error(`Erro ao inserir ${email}:`, error.message);
         }
     }
 
