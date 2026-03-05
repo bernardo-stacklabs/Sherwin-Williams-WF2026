@@ -1,0 +1,165 @@
+export const agendaData = [
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": "Data",
+    "__EMPTY_1": "Agenda",
+    "__EMPTY_2": "Responsável / Local",
+    "__EMPTY_3": "Horário"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46056,
+    "__EMPTY": "2ª feira",
+    "__EMPTY_1": "Chegada",
+    "__EMPTY_2": "Hotel (Novo Hotel ou Transamerica Sorocaba)",
+    "__EMPTY_3": "14hs",
+    "__EMPTY_4": "18hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46056,
+    "__EMPTY": "2ª feira",
+    "__EMPTY_1": "Noite da Pizza - Deck (cerveja)",
+    "__EMPTY_2": "Scuderia",
+    "__EMPTY_3": "19hs",
+    "__EMPTY_4": "21hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46084,
+    "__EMPTY": "3ª feira",
+    "__EMPTY_1": "Palestra do Átila - Formação de Times Resilientes para Crescimento (Subir de Nível)",
+    "__EMPTY_2": "Átila Abreu",
+    "__EMPTY_3": "08:30hs",
+    "__EMPTY_4": "09:30hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46084,
+    "__EMPTY": "3ª feira",
+    "__EMPTY_1": "Apresentação Facility ",
+    "__EMPTY_2": "Rafael Braga",
+    "__EMPTY_3": "09:30hs",
+    "__EMPTY_4": "10:30hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46084,
+    "__EMPTY": "3ª feira",
+    "__EMPTY_1": "Coffee Break",
+    "__EMPTY_2": "Coffee Break",
+    "__EMPTY_3": 0.4375,
+    "__EMPTY_4": "11hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46084,
+    "__EMPTY": "3ª feira",
+    "__EMPTY_1": "Apresentação P&M",
+    "__EMPTY_2": "Paola Furtado",
+    "__EMPTY_3": "11hs",
+    "__EMPTY_4": "12hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46084,
+    "__EMPTY": "3ª feira",
+    "__EMPTY_1": "Apresentação  GI",
+    "__EMPTY_2": "Andrea Orsi",
+    "__EMPTY_3": "12hs",
+    "__EMPTY_4": "13hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46084,
+    "__EMPTY": "3ª feira",
+    "__EMPTY_1": "Almoço",
+    "__EMPTY_2": "Restaurante Scuderia",
+    "__EMPTY_3": "13hs",
+    "__EMPTY_4": "14:30hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46084,
+    "__EMPTY": "3ª feira",
+    "__EMPTY_1": "Apresentação RH - Novas Competências SW",
+    "__EMPTY_2": "Evelin Sanfilippo",
+    "__EMPTY_3": 0.6041666666666666,
+    "__EMPTY_4": "15:30hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46084,
+    "__EMPTY": "3ª feira",
+    "__EMPTY_1": "Coffee Break",
+    "__EMPTY_2": "Coffee Break",
+    "__EMPTY_3": "15:30hs",
+    "__EMPTY_4": "16hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46084,
+    "__EMPTY": "3ª feira",
+    "__EMPTY_1": "Apresentação Suvinil",
+    "__EMPTY_2": "Rafael Braga",
+    "__EMPTY_3": "16hs",
+    "__EMPTY_4": "17hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46084,
+    "__EMPTY": "3ª feira",
+    "__EMPTY_1": "Team Building - Kart",
+    "__EMPTY_2": "Time Scuderia",
+    "__EMPTY_3": "17:30hs",
+    "__EMPTY_4": "19hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46084,
+    "__EMPTY": "3ª feira",
+    "__EMPTY_1": "Jantar",
+    "__EMPTY_2": "Deck Scuderia",
+    "__EMPTY_3": "19hs",
+    "__EMPTY_4": "21hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46115,
+    "__EMPTY": "4ª feira",
+    "__EMPTY_1": "Treinamento Reset (Pocket)",
+    "__EMPTY_2": "Consultoria X",
+    "__EMPTY_3": "08:30hs",
+    "__EMPTY_4": "13hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46115,
+    "__EMPTY": "4ª feira",
+    "__EMPTY_1": "Almoço",
+    "__EMPTY_2": "Restaurante Scuderia",
+    "__EMPTY_3": "13hs",
+    "__EMPTY_4": "14hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46115,
+    "__EMPTY": "4ª feira",
+    "__EMPTY_1": "Treinamento Reset (Pocket)",
+    "__EMPTY_2": "Consultoria X",
+    "__EMPTY_3": "14hs",
+    "__EMPTY_4": "16hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46115,
+    "__EMPTY": "4ª feira",
+    "__EMPTY_1": "Team Building - Pit Stop",
+    "__EMPTY_2": "Time Scuderia",
+    "__EMPTY_3": "16:30hs",
+    "__EMPTY_4": "17:30hs"
+  },
+  {
+    "AGENDA EVENTO FACILITY - GESTORES": 46115,
+    "__EMPTY": "4ª feira",
+    "__EMPTY_1": "Churrasco - Scuderia",
+    "__EMPTY_2": "Scuderia",
+    "__EMPTY_3": "18hs",
+    "__EMPTY_4": "21hs",
+    "__EMPTY_5": "Deck - com banda"
+  },
+  {
+    "__EMPTY_1": "Suvinil"
+  },
+  {
+    "__EMPTY_1": "Segurança"
+  },
+  {
+    "__EMPTY_1": "Equipes - Apresentações"
+  },
+  {
+    "__EMPTY_1": "Tradutor"
+  }
+];

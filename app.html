@@ -1,0 +1,256 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Workshop Facilities 2026 – Sherwin-Williams</title>
+
+  <meta name="description"
+    content="Aplicativo do evento Workshop Facilities 2026 da Sherwin-Williams. Confira a programação e networking.">
+  <meta name="theme-color" content="#001B2E" />
+  <link rel="icon" type="image/svg+xml" href="./assets/logos/Logo H.svg">
+  <link rel="apple-touch-icon" href="./assets/logos/Logo H.svg">
+  <link rel="manifest" href="./manifest.webmanifest" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    (function () {
+      const BUILD = '6';
+      try {
+        const url = new URL(window.location.href);
+        const force = url.searchParams.get('forceUpdate') === '1';
+        const key = 'app_build';
+        const prev = localStorage.getItem(key);
+
+        if (force || prev !== BUILD) {
+          localStorage.setItem(key, BUILD);
+          const tasks = [];
+
+          if ('caches' in window) {
+            tasks.push(
+              caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+            );
+          }
+
+          if ('serviceWorker' in navigator) {
+            tasks.push(
+              navigator.serviceWorker.getRegistrations().then((regs) => Promise.all(regs.map((r) => r.unregister())))
+            );
+          }
+
+          Promise.allSettled(tasks).finally(() => {
+            url.searchParams.delete('forceUpdate');
+            url.searchParams.set('v', BUILD);
+            url.searchParams.set('reload', String(Date.now()));
+            window.location.replace(url.toString());
+          });
+          return;
+        }
+
+        if (url.searchParams.get('v') !== BUILD) {
+          url.searchParams.set('v', BUILD);
+          window.location.replace(url.toString());
+        }
+      } catch (e) { }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="./styles.css?v=6" />
+</head>
+
+<body class="home-page">
+  <main class="app-shell">
+    <section class="app-card" aria-label="Workshop Facilities 2026 Sherwin Willians">
+      <header class="home-header"
+        style="display:flex;flex-direction:row;justify-content:space-between;align-items:center;padding-top:24px;padding-bottom:16px;">
+        <div class="header-logo-left">
+          <img src="./assets/logos/Logo H.svg" alt="Sherwin-Williams" class="home-logo"
+            style="height: 22px; width: auto;" />
+        </div>
+        <div class="header-logo-right">
+          <img src="./assets/logos/WF26.png" alt="Workshop Facilities 2026" class="home-logo"
+            style="height: 14px; width: auto;" />
+        </div>
+      </header>
+
+      <div class="content-container">
+        <!-- ================= HOME SECTION ================= -->
+        <section class="home-section is-active" data-view="home">
+
+          <div class="home-welcome">
+            <h2 id="home-welcome-message"
+              style="font-size:1.5rem;font-weight:700;margin-bottom:0.5rem;padding: 0 5%;color:var(--text-primary)">Olá,
+              seja muito bem-vindo(a)!</h2>
+            <p style="padding: 0 5%; color:var(--text-secondary); margin-bottom: 1.5rem;">Explore a programação e faça
+              networking.</p>
+          </div>
+
+          <div class="action-cards-grid">
+            <a href="#" class="action-card" data-link="agenda">
+              <div class="action-icon">
+                <i data-lucide="calendar"></i>
+              </div>
+              <div class="action-content">
+                <h3>Agenda</h3>
+                <p>Veja a programação completa do evento</p>
+              </div>
+              <i data-lucide="chevron-right" class="action-arrow"></i>
+            </a>
+
+            <a href="#" class="action-card" data-link="networking">
+              <div class="action-icon">
+                <i data-lucide="users"></i>
+              </div>
+              <div class="action-content">
+                <h3>Networking</h3>
+                <p>Conheça os participantes</p>
+              </div>
+              <i data-lucide="chevron-right" class="action-arrow"></i>
+            </a>
+
+            <a href="#" class="action-card red" data-link="materiais">
+              <div class="action-icon">
+                <i data-lucide="folder"></i>
+              </div>
+              <div class="action-content">
+                <h3>Materiais</h3>
+                <p>Acesse fotos e conteúdos do evento</p>
+              </div>
+              <i data-lucide="external-link" class="action-arrow"></i>
+            </a>
+          </div>
+
+          <div class="highlight-block">
+            <h2>Destaques de hoje</h2>
+            <div class="schedule-list" id="home-highlights-list" aria-live="polite">
+              <!-- JS rendered -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= AGENDA SECTION ================= -->
+        <section class="home-section" data-view="agenda">
+          <header class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title">Agenda</h2>
+            </div>
+          </header>
+
+          <!-- Tabs rendered via JS based on data -->
+          <div class="day-tabs" id="agenda-day-tabs" role="tablist" aria-label="Selecionar dia da agenda">
+          </div>
+
+          <div class="schedule-list" id="schedule-list" aria-live="polite">
+            <!-- JS rendered -->
+          </div>
+        </section>
+
+        <!-- ================= NETWORKING SECTION ================= -->
+        <section class="home-section" data-view="networking">
+          <header class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title">Networking</h2>
+              <span class="networking-counter" id="networking-counter"></span>
+            </div>
+          </header>
+
+          <div class="search-bar-container">
+            <div class="search-input-wrapper">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="networking-search" class="search-input" placeholder="Buscar participante..." />
+            </div>
+          </div>
+
+          <div class="networking-list" id="networking-list">
+            <!-- JS Rendered Participants -->
+          </div>
+        </section>
+
+        <!-- ================= MATERIAIS SECTION ================= -->
+        <section class="home-section" data-view="materiais">
+          <div class="materials-wrapper">
+            <div class="materials-icon">
+              <i data-lucide="folder-open"></i>
+            </div>
+            <h2 class="materials-title">Materiais do Evento</h2>
+            <p class="materials-desc">Acesse as fotos e materiais oficiais do workshop armazenados em nossa pasta
+              oficial.</p>
+            <button type="button" class="primary-button" id="btn-google-drive">
+              <span class="button-label">Abrir Google Drive</span>
+              <i data-lucide="external-link"></i>
+            </button>
+          </div>
+        </section>
+
+        <!-- ================= BOTTOM NAVIGATION ================= -->
+        <nav class="bottom-nav" aria-label="Navegação principal">
+          <button class="bottom-nav-item is-active" type="button" data-view-target="home">
+            <span class="bottom-nav-icon" aria-hidden="true">
+              <i data-lucide="home"></i>
+            </span>
+            <span class="bottom-nav-label">Home</span>
+          </button>
+          <button class="bottom-nav-item" type="button" data-view-target="agenda">
+            <span class="bottom-nav-icon" aria-hidden="true">
+              <i data-lucide="calendar"></i>
+            </span>
+            <span class="bottom-nav-label">Agenda</span>
+          </button>
+          <button class="bottom-nav-item" type="button" data-view-target="networking">
+            <span class="bottom-nav-icon" aria-hidden="true">
+              <i data-lucide="users"></i>
+            </span>
+            <span class="bottom-nav-label">Networking</span>
+          </button>
+          <button class="bottom-nav-item" type="button" data-view-target="materiais">
+            <span class="bottom-nav-icon" aria-hidden="true">
+              <i data-lucide="folder"></i>
+            </span>
+            <span class="bottom-nav-label">Materiais</span>
+          </button>
+        </nav>
+      </div>
+    </section>
+
+    <!-- Modal Participant -->
+    <dialog id="app-modal" class="modal app-modal">
+      <div class="modal-content">
+        <header class="modal-header">
+          <h3 id="modal-title" class="modal-title"></h3>
+          <button type="button" class="modal-close" aria-label="Fechar modal">
+            <i data-lucide="x"></i>
+          </button>
+        </header>
+        <div class="modal-body">
+          <p id="modal-description" class="modal-description"></p>
+          <div class="modal-info">
+            <div id="modal-time" class="modal-meta-row modal-time">
+              <span class="modal-meta-icon" aria-hidden="true"><i data-lucide="clock"></i></span>
+              <span id="modal-time-text"></span>
+            </div>
+            <div id="modal-location" class="modal-meta-row modal-location">
+              <span class="modal-meta-icon" aria-hidden="true"><i data-lucide="map-pin"></i></span>
+              <span id="modal-location-text"></span>
+            </div>
+          </div>
+        </div>
+        <div id="modal-actions" class="modal-actions"></div>
+      </div>
+    </dialog>
+  </main>
+
+  <!-- PWA Update Toast -->
+  <div id="update-toast" class="update-toast">
+    <p>Nova versão disponível</p>
+    <button id="btn-update">Atualizar</button>
+  </div>
+
+  <script src="./app.js?v=6" type="module"></script>
+</body>
+
+</html>
