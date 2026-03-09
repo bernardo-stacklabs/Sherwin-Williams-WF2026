@@ -109,7 +109,7 @@ export const i18n = {
         wfAgendaLeadershipTraining8h: 'Treinamento Liderança - 8hs',
         wfAgendaLeadershipTrainingClosing: 'Treinamento Liderança - Fechamento com Team Building (Quebra da Madeira)',
         wfAgendaResetTraining: 'Treinamento Reset (Pocket)',
-        wfAgendaPitStop: 'Team Buildinghttps://drive.google.com/drive/folders/1LXQjov_59-Q_5Xs01n-C_tBIDnFtPGGC',
+        wfAgendaPitStop: 'Team Building',
         wfAgendaBBQ: 'Churrasco - Scuderia',
         wfAgendaClosing: 'Encerramento',
         wfAgendaDepartures: 'Partida',

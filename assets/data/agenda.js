@@ -56,7 +56,7 @@ export const agendaData = [
   {
     "AGENDA EVENTO FACILITY - GESTORES": "03/09/2026",
     "__EMPTY": "2ª feira",
-    "__EMPTY_1": "Team Buildinghttps://drive.google.com/drive/folders/1LXQjov_59-Q_5Xs01n-C_tBIDnFtPGGC",
+    "__EMPTY_1": "Team Building",
     "__EMPTY_2": "Time Scuderia",
     "__EMPTY_3": "18hs",
     "__EMPTY_4": "19:00hs"
