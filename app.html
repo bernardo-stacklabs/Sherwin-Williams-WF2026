@@ -138,23 +138,6 @@
           </div>
         </section>
 
-        <!-- ================= FOTOS SECTION ================= -->
-        <section class="home-section" data-view="fotos">
-          <header class="section-header">
-            <div class="section-title-wrap">
-              <h2 class="section-title" data-i18n="photosTitle">Fotos</h2>
-            </div>
-          </header>
-
-          <p class="photos-empty is-hidden" id="photos-empty" data-i18n="photosPlaceholder">
-            As fotos oficiais serão disponibilizadas nesta aba ao longo do evento.
-          </p>
-
-          <div class="photos-grid" id="photos-grid" aria-live="polite">
-            <!-- JS Rendered Photos -->
-          </div>
-        </section>
-
         <!-- ================= MATERIAIS SECTION ================= -->
         <section class="home-section" data-view="materiais">
           <div class="materials-wrapper">
@@ -191,12 +174,6 @@
             </span>
             <span class="bottom-nav-label" data-i18n="networkingTitle">Networking</span>
           </button>
-          <button class="bottom-nav-item" type="button" data-view-target="fotos">
-            <span class="bottom-nav-icon" aria-hidden="true">
-              <i data-lucide="image"></i>
-            </span>
-            <span class="bottom-nav-label" data-i18n="navPhotos">Fotos</span>
-          </button>
           <button class="bottom-nav-item" type="button" data-view-target="materiais">
             <span class="bottom-nav-icon" aria-hidden="true">
               <i data-lucide="folder"></i>
@@ -217,8 +194,9 @@
           </button>
         </header>
         <div class="modal-body">
+          <div id="profile-content" class="profile-content is-hidden"></div>
           <p id="modal-description" class="modal-description"></p>
-          <div class="modal-info">
+          <div class="modal-info" id="modal-info">
             <div id="modal-time" class="modal-meta-row modal-time">
               <span class="modal-meta-icon" aria-hidden="true"><i data-lucide="clock"></i></span>
               <span id="modal-time-text"></span>

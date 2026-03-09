@@ -354,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAgenda();
   initNetworking();
   initHomeHighlights();
-  initPhotos();
+  initProfileModal();
 });
 
 function initServiceWorker() {
@@ -366,6 +366,146 @@ function initServiceWorker() {
 function initIcons() {
   if (window.lucide) {
     window.lucide.createIcons();
+  }
+}
+
+// ---- Participant photos (match by name) ----
+let photoIndex = null;
+
+function normalizeNameForMatch(name) {
+  return String(name || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toUpperCase();
+}
+
+function nameKeyFirstLast(normalized) {
+  const parts = String(normalized || '').split(' ').filter(Boolean);
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1]}`;
+}
+
+function buildPhotoIndex() {
+  const list = Array.isArray(photosData) ? photosData : [];
+  const byFull = new Map();
+  const byFirstLast = new Map();
+
+  list.forEach((item) => {
+    const rawName = String(item?.name || '').trim();
+    const file = String(item?.file || '').trim();
+    if (!rawName || !file) return;
+    const normalized = normalizeNameForMatch(rawName);
+    const firstLast = nameKeyFirstLast(normalized);
+    if (normalized && !byFull.has(normalized)) byFull.set(normalized, file);
+    if (firstLast && !byFirstLast.has(firstLast)) byFirstLast.set(firstLast, file);
+  });
+
+  return { byFull, byFirstLast };
+}
+
+function getPhotoFileForPersonName(fullName) {
+  if (!photoIndex) photoIndex = buildPhotoIndex();
+  const normalized = normalizeNameForMatch(fullName);
+  if (!normalized) return '';
+
+  const direct = photoIndex.byFull.get(normalized);
+  if (direct) return direct;
+
+  const firstLast = nameKeyFirstLast(normalized);
+  return photoIndex.byFirstLast.get(firstLast) || '';
+}
+
+function encodeFilePathSegment(file) {
+  return encodeURIComponent(String(file || '')).replaceAll('%2F', '/');
+}
+
+// ---- Profile modal ----
+function initProfileModal() {
+  const modal = document.getElementById('app-modal');
+  if (!modal) return;
+
+  const closeBtn = modal.querySelector('.modal-close');
+  closeBtn?.addEventListener('click', () => {
+    try { modal.close(); } catch (e) { modal.removeAttribute('open'); }
+  });
+
+  modal.addEventListener('click', (e) => {
+    // click outside content closes
+    if (e.target === modal) {
+      try { modal.close(); } catch (err) { modal.removeAttribute('open'); }
+    }
+  });
+}
+
+function openParticipantProfile(participant) {
+  const modal = document.getElementById('app-modal');
+  if (!modal) return;
+
+  const titleEl = document.getElementById('modal-title');
+  const descEl = document.getElementById('modal-description');
+  const infoEl = document.getElementById('modal-info');
+  const actionsEl = document.getElementById('modal-actions');
+  const profileEl = document.getElementById('profile-content');
+
+  if (titleEl) titleEl.textContent = participant?.nome || '';
+  if (actionsEl) actionsEl.innerHTML = '';
+
+  if (descEl) descEl.classList.add('is-hidden');
+  if (infoEl) infoEl.classList.add('is-hidden');
+  if (profileEl) profileEl.classList.remove('is-hidden');
+
+  const file = participant?.photoFile || '';
+  const photoHTML = file
+    ? `<div class="profile-photo"><img src="./assets/photos/${encodeFilePathSegment(file)}" alt="${formatTemplate(t('photoAltNamed') || 'Photo of {name}', { name: participant?.nome || '' })}" loading="lazy" decoding="async" /></div>`
+    : `<div class="profile-photo"><div class="profile-photo-fallback">${participant?.iniciais || ''}</div></div>`;
+
+  const email = participant?.email || '';
+  const emailHTML = email
+    ? `<a href="mailto:${email}" style="color:var(--secondary-blue);text-decoration:underline;word-break:break-all;">${email}</a>`
+    : '';
+
+  if (profileEl) {
+    profileEl.innerHTML = `
+      ${photoHTML}
+      <div class="profile-meta">
+        <div class="profile-meta-row">
+          <i data-lucide="briefcase"></i>
+          <div>
+            <div class="profile-meta-label">${t('labelRole') || 'Role'}</div>
+            <div class="profile-meta-value">${participant?.cargo || ''}</div>
+          </div>
+        </div>
+        <div class="profile-meta-row">
+          <i data-lucide="map-pin"></i>
+          <div>
+            <div class="profile-meta-label">${t('labelLocation') || 'Location'}</div>
+            <div class="profile-meta-value">${participant?.localidade || ''}</div>
+          </div>
+        </div>
+        ${email ? `
+          <div class="profile-meta-row">
+            <i data-lucide="mail"></i>
+            <div>
+              <div class="profile-meta-label">${t('labelEmail') || 'Email'}</div>
+              <div class="profile-meta-value">${emailHTML}</div>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  initIcons();
+
+  try {
+    if (typeof modal.showModal === 'function') modal.showModal();
+    else modal.setAttribute('open', '');
+  } catch (e) {
+    modal.setAttribute('open', '');
   }
 }
 
@@ -672,12 +812,15 @@ function initNetworking() {
     }
     const cargoDisplay = getCurrentLang() === 'en' ? cargoEn : cargoPt;
 
+    const photoFile = getPhotoFileForPersonName(fullName);
+
     return {
       nome: fullName,
       cargo: cargoDisplay,
       localidade: p.LOCALIDADE ? titleCase(p.LOCALIDADE) : 'Sherwin-Williams',
       email: (p.E_MAIL || '').trim().toLowerCase(),
-      iniciais: iniciais
+      iniciais: iniciais,
+      photoFile
     };
   }).sort((a, b) => a.nome.localeCompare(b.nome));
 
@@ -692,10 +835,18 @@ function initNetworking() {
       const el = document.createElement('div');
       el.className = 'participant-card';
 
+      el.addEventListener('click', () => {
+        openParticipantProfile(p);
+      });
+
+      const avatarHTML = p.photoFile
+        ? `<img src="./assets/photos/${encodeFilePathSegment(p.photoFile)}" alt="${formatTemplate(t('photoAltNamed') || 'Photo of {name}', { name: p.nome })}" loading="lazy" decoding="async" />`
+        : `${p.iniciais}`;
+
       const emailHTML = p.email ? `<div class="participant-email"><a href="mailto:${p.email}" style="color:var(--secondary-blue);text-decoration:underline;word-break:break-all;">${p.email}</a></div>` : '';
 
       el.innerHTML = `
-                <div class="participant-avatar">${p.iniciais}</div>
+            <div class="participant-avatar">${avatarHTML}</div>
                 <div class="participant-info">
                     <h3 class="participant-name">${p.nome}</h3>
                     <div class="participant-role">${p.cargo}</div>
@@ -729,64 +880,5 @@ function initNetworking() {
       renderList(filt);
     });
   }
-}
-
-// ---- Fotos ----
-function initPhotos() {
-  const grid = document.getElementById('photos-grid');
-  const emptyEl = document.getElementById('photos-empty');
-  if (!grid) return;
-
-  const list = Array.isArray(photosData) ? photosData : [];
-  grid.innerHTML = '';
-
-  if (emptyEl) emptyEl.classList.add('is-hidden');
-  if (!list.length) {
-    if (emptyEl) emptyEl.classList.remove('is-hidden');
-    return;
-  }
-
-  const encodeFile = (file) => encodeURIComponent(String(file || '')).replaceAll('%2F', '/');
-
-  let pending = list.length;
-  let loadedAny = false;
-
-  const maybeDone = () => {
-    pending -= 1;
-    if (pending > 0) return;
-    if (!loadedAny && emptyEl) emptyEl.classList.remove('is-hidden');
-  };
-
-  list.forEach((item) => {
-    const name = String(item?.name || '').trim();
-    const file = String(item?.file || '').trim();
-    if (!file) {
-      maybeDone();
-      return;
-    }
-
-    const tile = document.createElement('div');
-    tile.className = 'photo-tile';
-
-    const img = document.createElement('img');
-    const altTemplate = t('photoAltNamed') || 'Photo of {name}';
-    img.alt = formatTemplate(altTemplate, { name: name || '' });
-    img.loading = 'lazy';
-    img.decoding = 'async';
-    img.src = `./assets/photos/${encodeFile(file)}`;
-
-    img.addEventListener('load', () => {
-      loadedAny = true;
-      maybeDone();
-    });
-
-    img.addEventListener('error', () => {
-      tile.remove();
-      maybeDone();
-    });
-
-    tile.appendChild(img);
-    grid.appendChild(tile);
-  });
 }
 
