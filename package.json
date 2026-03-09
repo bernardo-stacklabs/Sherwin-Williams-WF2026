@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "dev": "node local_server.js",
+    "generate:photos": "node tmp/generate_photos_manifest.mjs"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.98.0",
     "cross-fetch": "^4.1.0"

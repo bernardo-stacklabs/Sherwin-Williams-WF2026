@@ -1,5 +1,7 @@
 import { agendaData } from './assets/data/agenda.js';
 import { participantesData } from './assets/data/participantes.js';
+import { photosData } from './assets/data/photos.js';
+import { i18n } from './locales.js';
 
 // ---- Configurações Globais ----
 const GOOGLE_DRIVE_LINK = "https://drive.google.com/drive/folders/1LXQjov_59-Q_5Xs01n-C_tBIDnFtPGGC?usp=sharing";
@@ -28,9 +30,119 @@ const loginCard = document.querySelector('.login-card');
 
 const AUTH_PROVIDER = 'supabase';
 
+// ---- i18n (PT/EN) ----
+const SUPPORTED_LANGS = ['pt', 'en'];
+
+function getCurrentLang() {
+  try {
+    const stored = (localStorage.getItem('lang') || '').toLowerCase();
+    if (SUPPORTED_LANGS.includes(stored)) return stored;
+  } catch (e) { }
+  return 'pt';
+}
+
+let translationMapPtToEn = null;
+
+function buildTranslationMap(fromLang, toLang) {
+  const map = new Map();
+  const from = i18n?.[fromLang] || {};
+  const to = i18n?.[toLang] || {};
+
+  Object.keys(from).forEach((key) => {
+    const fromVal = from[key];
+    const toVal = to[key];
+    if (typeof fromVal === 'string' && typeof toVal === 'string' && fromVal.trim() && toVal.trim()) {
+      map.set(fromVal.trim(), toVal);
+    }
+  });
+  return map;
+}
+
+function translateFromPt(text) {
+  const lang = getCurrentLang();
+  if (lang !== 'en') return text;
+  if (typeof text !== 'string') return text;
+  if (!translationMapPtToEn) translationMapPtToEn = buildTranslationMap('pt', 'en');
+  return translationMapPtToEn.get(text.trim()) || text;
+}
+
+function formatTemplate(template, vars) {
+  let out = template || '';
+  Object.keys(vars || {}).forEach((k) => {
+    out = out.replaceAll(`{${k}}`, String(vars[k] ?? ''));
+  });
+  return out;
+}
+
+function t(key) {
+  const lang = getCurrentLang();
+  return (i18n?.[lang] && i18n[lang][key]) || (i18n?.pt && i18n.pt[key]) || '';
+}
+
+function applyI18n() {
+  const lang = getCurrentLang();
+  document.documentElement.lang = lang === 'en' ? 'en' : 'pt-BR';
+
+  document.querySelectorAll('[data-i18n]')?.forEach((el) => {
+    const key = el.getAttribute('data-i18n');
+    const value = key ? t(key) : '';
+    if (value) el.textContent = value;
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]')?.forEach((el) => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    const value = key ? t(key) : '';
+    if (value) el.setAttribute('placeholder', value);
+  });
+
+  document.querySelectorAll('[data-i18n-aria-label]')?.forEach((el) => {
+    const key = el.getAttribute('data-i18n-aria-label');
+    const value = key ? t(key) : '';
+    if (value) el.setAttribute('aria-label', value);
+  });
+
+  const langSelect = document.getElementById('lang-select');
+  if (langSelect && langSelect.value !== lang) {
+    langSelect.value = lang;
+  }
+
+  document.querySelectorAll('.lang-toggle-btn[data-lang]')?.forEach((btn) => {
+    const btnLang = (btn.getAttribute('data-lang') || '').toLowerCase();
+    const isActive = btnLang === lang;
+    btn.classList.toggle('is-active', isActive);
+    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+}
+
+function initI18n() {
+  applyI18n();
+
+  const langSelect = document.getElementById('lang-select');
+  if (langSelect) {
+    langSelect.value = getCurrentLang();
+    langSelect.addEventListener('change', () => {
+      const next = (langSelect.value || 'pt').toLowerCase();
+      try {
+        localStorage.setItem('lang', SUPPORTED_LANGS.includes(next) ? next : 'pt');
+      } catch (e) { }
+      window.location.reload();
+    });
+  }
+
+  document.querySelectorAll('.lang-toggle-btn[data-lang]')?.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const next = (btn.getAttribute('data-lang') || 'pt').toLowerCase();
+      try {
+        localStorage.setItem('lang', SUPPORTED_LANGS.includes(next) ? next : 'pt');
+      } catch (e) { }
+      window.location.reload();
+    });
+  });
+}
+
 const supabaseConfig = {
-  url: 'https://kjwlboqqdufrkhcxjppf.supabase.co',
-  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtqd2xib3FxZHVmcmtoY3hqcHBmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzMyOTU2OCwiZXhwIjoyMDc4OTA1NTY4fQ.t30eEhmv9uVv-FEDoDKKwrgb6lfj6NUYEnTl47bydsw',
+  url: 'https://pffbpufjovqlxzogrtjl.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmZmJwdWZqb3ZxbHh6b2dydGpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMjQyOTAsImV4cCI6MjA4ODYwMDI5MH0.kckgDcj2PR9n7xDmiVqIk19ym6zdgUfkPBUEWpl_AwI',
 };
 
 let supabaseClient = null;
@@ -43,14 +155,14 @@ function setError(input, message) {
 }
 
 function validateEmail(value) {
-  if (!value) return 'Informe seu e-mail corporativo';
+  if (!value) return t('emailRequired') || 'Informe seu e-mail corporativo';
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailPattern.test(value)) return 'Digite um e-mail válido';
+  if (!emailPattern.test(value)) return t('emailInvalid') || 'Digite um e-mail válido';
   return '';
 }
 
 function validatePassword(value) {
-  if (!value) return 'Informe sua senha';
+  if (!value) return t('passwordRequired') || 'Informe sua senha';
   return '';
 }
 
@@ -81,7 +193,7 @@ async function getSupabaseClient() {
 
   if (!window.supabase) {
     console.error('Supabase SDK not loaded via script tag');
-    alert('Erro: A biblioteca do Supabase não foi carregada.');
+    alert(t('supabaseSdkMissing') || 'Erro: A biblioteca do Supabase não foi carregada.');
     throw new Error('Supabase SDK not loaded');
   }
   const { createClient } = window.supabase;
@@ -131,9 +243,9 @@ form?.addEventListener('submit', async (event) => {
   } catch (error) {
     console.error(error);
     if (error && error.message === 'INVALID_CREDENTIALS') {
-      setError(passwordInput, 'E-mail ou senha inválidos');
+      setError(passwordInput, t('invalidCredentials') || 'E-mail ou senha inválidos');
     } else {
-      setError(passwordInput, 'Não foi possível conectar. Verifique sua conexão e tente novamente.');
+      setError(passwordInput, t('connectError') || 'Não foi possível conectar. Verifique sua conexão e tente novamente.');
     }
   } finally {
     setLoading(false, submitButton);
@@ -183,14 +295,14 @@ resetForm?.addEventListener('submit', async (event) => {
 
   let newPasswordError = '';
   if (!newPassword) {
-    newPasswordError = 'Informe a nova senha';
+    newPasswordError = t('resetNewPasswordRequired') || 'Informe a nova senha';
   }
 
   let confirmPasswordError = '';
   if (!confirmPassword) {
-    confirmPasswordError = 'Confirme a nova senha';
+    confirmPasswordError = t('resetConfirmPasswordRequired') || 'Confirme a nova senha';
   } else if (newPassword && newPassword !== confirmPassword) {
-    confirmPasswordError = 'As senhas não conferem';
+    confirmPasswordError = t('resetPasswordsMismatch') || 'As senhas não conferem';
   }
 
   setError(newPasswordInput, newPasswordError);
@@ -211,23 +323,23 @@ resetForm?.addEventListener('submit', async (event) => {
 
     if (error) {
       console.error('Erro ao redefinir senha:', error);
-      alert('Não foi possível redefinir a senha. Tente novamente.');
+      alert(t('resetFailed') || 'Não foi possível redefinir a senha. Tente novamente.');
       return;
     }
 
     if (!data) {
-      setError(resetEmailInput, 'E-mail não encontrado');
+      setError(resetEmailInput, t('emailNotFound') || 'E-mail não encontrado');
       return;
     }
 
-    alert('Senha redefinida com sucesso! Use a nova senha para entrar.');
+    alert(t('resetSuccess') || 'Senha redefinida com sucesso! Use a nova senha para entrar.');
     emailInput.value = email;
     passwordInput.value = '';
     switchToLoginMode();
     passwordInput.focus();
   } catch (error) {
     console.error(error);
-    alert('Não foi possível redefinir a senha. Tente novamente.');
+    alert(t('resetFailed') || 'Não foi possível redefinir a senha. Tente novamente.');
   } finally {
     setLoading(false, resetSubmitButton);
   }
@@ -236,11 +348,20 @@ resetForm?.addEventListener('submit', async (event) => {
 // ---- Inicialização ----
 document.addEventListener('DOMContentLoaded', () => {
   initIcons();
+  initI18n();
+  initServiceWorker();
   initNavigation();
   initAgenda();
   initNetworking();
   initHomeHighlights();
+  initPhotos();
 });
+
+function initServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  // SW requires secure context (https) or localhost
+  navigator.serviceWorker.register('./sw.js').catch(() => { });
+}
 
 function initIcons() {
   if (window.lucide) {
@@ -336,11 +457,11 @@ function initAgenda() {
     }
 
     agendaAgrupada[diaNome].push({
-      titulo: item["__EMPTY_1"],
-      localResponsavel: item["__EMPTY_2"] || '',
+      titulo: translateFromPt(item["__EMPTY_1"]),
+      localResponsavel: translateFromPt(item["__EMPTY_2"] || ''),
       horaInicio: parseHoraExcel(item["__EMPTY_3"] || ''),
       horaFim: parseHoraExcel(item["__EMPTY_4"] || ''),
-      obs: item["__EMPTY_5"] || ''
+      obs: translateFromPt(item["__EMPTY_5"] || '')
     });
   });
 
@@ -348,9 +469,9 @@ function initAgenda() {
 
   // Mapeamento de tabnames de semana para data conforme pedido
   const dayToDateMap = {
-    '2ª feira': '26 de Jan',
-    '3ª feira': '27 de Jan',
-    '4ª feira': '28 de Jan'
+    '2ª feira': getCurrentLang() === 'en' ? 'Jan 26' : '26 de Jan',
+    '3ª feira': getCurrentLang() === 'en' ? 'Jan 27' : '27 de Jan',
+    '4ª feira': getCurrentLang() === 'en' ? 'Jan 28' : '28 de Jan'
   };
 
   // Renderiza Tabs
@@ -379,7 +500,8 @@ function initAgenda() {
     const sessoes = agendaAgrupada[diaNome];
 
     if (!sessoes || sessoes.length === 0) {
-      scheduleList.innerHTML = '<p style="text-align:center;color:var(--text-tertiary);padding:var(--spacing-xl) 0;">Nenhuma atividade programada para este dia.</p>';
+      const msg = t('emptyScheduleDay') || 'Nenhuma atividade programada para este dia.';
+      scheduleList.innerHTML = `<p style="text-align:center;color:var(--text-tertiary);padding:var(--spacing-xl) 0;">${msg}</p>`;
       return;
     }
 
@@ -401,7 +523,7 @@ function createSessionCard(sessao) {
   el.className = 'session-card';
 
   const timeHTML = sessao.horaFim
-    ? `<span class="time-main">${sessao.horaInicio}</span><span class="time-sub">até ${sessao.horaFim}</span>`
+    ? `<span class="time-main">${sessao.horaInicio}</span><span class="time-sub">${t('until') || 'até'} ${sessao.horaFim}</span>`
     : `<span class="time-main">${sessao.horaInicio}</span>`;
 
   // Removido o ícone pois o conteúdo é variável (às vezes pessoa, às vezes local)
@@ -431,9 +553,10 @@ function initWelcomeMessage() {
     const userName = localStorage.getItem('logged_user_name');
     if (userName) {
       const firstName = userName.split(' ')[0];
-      welcomeEl.textContent = `Olá ${firstName}, seja muito bem-vindo!`;
+      const template = t('welcomeNamed') || 'Olá {name}, seja muito bem-vindo!';
+      welcomeEl.textContent = formatTemplate(template, { name: firstName });
     } else {
-      welcomeEl.textContent = `Olá, seja muito bem-vindo(a)!`;
+      welcomeEl.textContent = t('welcomeGeneric') || 'Olá, seja muito bem-vindo(a)!';
     }
   }
 }
@@ -452,11 +575,11 @@ function initHomeHighlights() {
   hlContainer.innerHTML = '';
   destaques.forEach(row => {
     const sessao = {
-      titulo: row["__EMPTY_1"],
-      localResponsavel: row["__EMPTY_2"] || '',
+      titulo: translateFromPt(row["__EMPTY_1"]),
+      localResponsavel: translateFromPt(row["__EMPTY_2"] || ''),
       horaInicio: parseHoraExcel(row["__EMPTY_3"] || ''),
       horaFim: parseHoraExcel(row["__EMPTY_4"] || ''),
-      obs: row["__EMPTY_5"] || ''
+      obs: translateFromPt(row["__EMPTY_5"] || '')
     };
 
     const el = createSessionCard(sessao);
@@ -476,26 +599,94 @@ function initNetworking() {
   // Format local data
   const validP = participantesData.filter(p => typeof p.NOME_COMP === 'string');
 
-  // Title Case Helper
+  // Title Case Helper (names/places)
   const titleCase = (str) => str.toLowerCase().split(' ').map(w => w.length > 2 ? w.charAt(0).toUpperCase() + w.slice(1) : w).join(' ');
+
+  // Job title normalization (keep "de/da/do" lowercase, roman numerals uppercase, and space after dots)
+  const JOB_STOPWORDS = new Set(['de', 'da', 'do', 'das', 'dos', 'e']);
+  const isRomanNumeral = (token) => {
+    const t = (token || '').toString().trim();
+    return /^[ivxlcdm]+$/i.test(t) && t.length <= 6;
+  };
+  const toTitleWord = (word) => {
+    const w = (word || '').toString();
+    if (!w) return '';
+    return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+  };
+  const splitAffixes = (token) => {
+    const t = (token || '').toString();
+    const leading = (t.match(/^[\("'\[]+/) || [''])[0];
+    const trailing = (t.match(/[\)"'\],;:]+$/) || [''])[0];
+    const core = t.slice(leading.length, t.length - trailing.length);
+    return { leading, core, trailing };
+  };
+  const formatJobCore = (core) => {
+    const c = (core || '').toString();
+    if (!c) return '';
+    const lower = c.toLowerCase();
+    if (JOB_STOPWORDS.has(lower)) return lower;
+    if (isRomanNumeral(c)) return c.toUpperCase();
+
+    // Abbreviations/segments separated by dots: GER.REC.HUMANOS -> Ger. Rec. Humanos
+    if (c.includes('.')) {
+      const hasTrailingDot = c.endsWith('.');
+      const parts = c.split('.').filter(p => p.length > 0);
+      const formattedParts = parts.map(p => {
+        const pl = p.toLowerCase();
+        if (JOB_STOPWORDS.has(pl)) return pl;
+        if (isRomanNumeral(p)) return p.toUpperCase();
+        return toTitleWord(p);
+      });
+      let joined = formattedParts.join('. ');
+      if (hasTrailingDot) joined += '.';
+      return joined;
+    }
+
+    return toTitleWord(c);
+  };
+  const formatJobTitle = (value) => {
+    const raw = (value || '').toString().trim();
+    if (!raw) return '';
+    return raw
+      .replace(/\s+/g, ' ')
+      .split(' ')
+      .map(token => {
+        const { leading, core, trailing } = splitAffixes(token);
+        return leading + formatJobCore(core) + trailing;
+      })
+      .join(' ');
+  };
 
   const formatedParticipants = validP.map(p => {
     const fullName = titleCase(p.NOME_COMP);
     const nameParts = fullName.split(' ');
     const iniciais = nameParts.length > 1 ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase() : fullName.substring(0, 2).toUpperCase();
 
+    const rawCargo = (p.CARGO || '').toString().trim();
+    const cargoPt = rawCargo ? formatJobTitle(rawCargo) : (t('defaultRole') || 'Participante');
+    let cargoEn = rawCargo ? translateFromPt(rawCargo) : (t('defaultRole') || 'Participant');
+    if (rawCargo && cargoEn === rawCargo) {
+      const normalizedPt = formatJobTitle(rawCargo);
+      const translated = translateFromPt(normalizedPt);
+      if (translated && translated !== normalizedPt) cargoEn = translated;
+    }
+    const cargoDisplay = getCurrentLang() === 'en' ? cargoEn : cargoPt;
+
     return {
       nome: fullName,
-      cargo: p.CARGO ? titleCase(p.CARGO) : 'Participante',
+      cargo: cargoDisplay,
       localidade: p.LOCALIDADE ? titleCase(p.LOCALIDADE) : 'Sherwin-Williams',
-      email: (p.E_MAIL || '').toLowerCase(),
+      email: (p.E_MAIL || '').trim().toLowerCase(),
       iniciais: iniciais
     };
   }).sort((a, b) => a.nome.localeCompare(b.nome));
 
+  // Only Sherwin emails in Networking tab
+  const sherwinOnlyParticipants = formatedParticipants.filter(p => p.email.includes('@sherwin'));
+
   function renderList(list) {
     ntList.innerHTML = '';
-    if (ntCounter) ntCounter.textContent = `${list.length} participantes`;
+    if (ntCounter) ntCounter.textContent = `${list.length} ${t('participants') || 'participantes'}`;
 
     list.forEach(p => {
       const el = document.createElement('div');
@@ -519,13 +710,18 @@ function initNetworking() {
     initIcons();
   }
 
-  renderList(formatedParticipants);
+  renderList(sherwinOnlyParticipants);
+
+  if (ntSearch) {
+    const placeholder = t('networkingSearchPlaceholder');
+    if (placeholder) ntSearch.setAttribute('placeholder', placeholder);
+  }
 
   // Filter Logic
   if (ntSearch) {
     ntSearch.addEventListener('input', (e) => {
       const t = e.target.value.toLowerCase();
-      const filt = formatedParticipants.filter(p =>
+      const filt = sherwinOnlyParticipants.filter(p =>
         p.nome.toLowerCase().includes(t) ||
         p.cargo.toLowerCase().includes(t) ||
         p.localidade.toLowerCase().includes(t)
@@ -533,5 +729,64 @@ function initNetworking() {
       renderList(filt);
     });
   }
+}
+
+// ---- Fotos ----
+function initPhotos() {
+  const grid = document.getElementById('photos-grid');
+  const emptyEl = document.getElementById('photos-empty');
+  if (!grid) return;
+
+  const list = Array.isArray(photosData) ? photosData : [];
+  grid.innerHTML = '';
+
+  if (emptyEl) emptyEl.classList.add('is-hidden');
+  if (!list.length) {
+    if (emptyEl) emptyEl.classList.remove('is-hidden');
+    return;
+  }
+
+  const encodeFile = (file) => encodeURIComponent(String(file || '')).replaceAll('%2F', '/');
+
+  let pending = list.length;
+  let loadedAny = false;
+
+  const maybeDone = () => {
+    pending -= 1;
+    if (pending > 0) return;
+    if (!loadedAny && emptyEl) emptyEl.classList.remove('is-hidden');
+  };
+
+  list.forEach((item) => {
+    const name = String(item?.name || '').trim();
+    const file = String(item?.file || '').trim();
+    if (!file) {
+      maybeDone();
+      return;
+    }
+
+    const tile = document.createElement('div');
+    tile.className = 'photo-tile';
+
+    const img = document.createElement('img');
+    const altTemplate = t('photoAltNamed') || 'Photo of {name}';
+    img.alt = formatTemplate(altTemplate, { name: name || '' });
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.src = `./assets/photos/${encodeFile(file)}`;
+
+    img.addEventListener('load', () => {
+      loadedAny = true;
+      maybeDone();
+    });
+
+    img.addEventListener('error', () => {
+      tile.remove();
+      maybeDone();
+    });
+
+    tile.appendChild(img);
+    grid.appendChild(tile);
+  });
 }
 

@@ -24,7 +24,7 @@
 
 <body class="home-page">
   <main class="app-shell">
-    <section class="app-card" aria-label="Workshop Facilities 2026 Sherwin Willians">
+    <section class="app-card" aria-label="Workshop Facilities 2026 Sherwin Willians" data-i18n-aria-label="appCardAria">
       <header class="home-header"
         style="display:flex;flex-direction:row;justify-content:space-between;align-items:center;padding-top:24px;padding-bottom:16px;">
         <div class="header-logo-left">
@@ -32,8 +32,14 @@
             style="height: 24px; width: auto;" />
         </div>
         <div class="header-logo-right">
-          <img src="./assets/logos/Logo H.svg" alt="Workshop Facilities 2026" class="home-logo"
-            style="height: 24px; width: auto;" />
+          <div class="lang-select-row">
+            <div class="lang-toggle" role="group" aria-label="Language" data-i18n-aria-label="languageSelectAria">
+              <button type="button" class="lang-toggle-btn" data-lang="pt" aria-pressed="true">PT</button>
+              <button type="button" class="lang-toggle-btn" data-lang="en" aria-pressed="false">EN</button>
+            </div>
+            <img src="./assets/logos/Logo H.svg" alt="Workshop Facilities 2026" class="home-logo"
+              style="height: 24px; width: auto;" />
+          </div>
         </div>
       </header>
 
@@ -43,10 +49,10 @@
 
           <div class="home-welcome">
             <h2 id="home-welcome-message"
-              style="font-size:1.5rem;font-weight:700;margin-bottom:0.5rem;padding: 0 5%;color:var(--text-primary)">Olá,
+              style="font-size:1.5rem;font-weight:700;margin-bottom:0.5rem;padding: 0 5%;color:var(--text-primary)" data-i18n="welcomeGeneric">Olá,
               seja muito bem-vindo(a)!</h2>
-            <p style="padding: 0 5%; color:var(--text-secondary); margin-bottom: 1.5rem;">Explore a programação e faça
-              networking.</p>
+            <p style="padding: 0 5%; color:var(--text-secondary); margin-bottom: 1.5rem;" data-i18n="homeExploreDesc">
+              Explore a programação e faça networking.</p>
           </div>
 
           <div class="action-cards-grid">
@@ -55,8 +61,8 @@
                 <i data-lucide="calendar"></i>
               </div>
               <div class="action-content">
-                <h3>Agenda</h3>
-                <p>Veja a programação completa do evento</p>
+                <h3 data-i18n="agendaTitle">Agenda</h3>
+                <p data-i18n="homeActionAgendaDesc">Veja a programação completa do evento</p>
               </div>
               <i data-lucide="chevron-right" class="action-arrow"></i>
             </a>
@@ -66,8 +72,8 @@
                 <i data-lucide="users"></i>
               </div>
               <div class="action-content">
-                <h3>Networking</h3>
-                <p>Conheça os participantes</p>
+                <h3 data-i18n="networkingTitle">Networking</h3>
+                <p data-i18n="homeActionNetworkingDesc">Conheça os participantes</p>
               </div>
               <i data-lucide="chevron-right" class="action-arrow"></i>
             </a>
@@ -77,15 +83,15 @@
                 <i data-lucide="folder"></i>
               </div>
               <div class="action-content">
-                <h3>Materiais</h3>
-                <p>Acesse fotos e conteúdos do evento</p>
+                <h3 data-i18n="navMaterials">Materiais</h3>
+                <p data-i18n="homeActionMaterialsDesc">Acesse fotos e conteúdos do evento</p>
               </div>
               <i data-lucide="external-link" class="action-arrow"></i>
             </a>
           </div>
 
           <div class="highlight-block">
-            <h2>Destaques de hoje</h2>
+            <h2 data-i18n="homeHighlightsTitle">Destaques de hoje</h2>
             <div class="schedule-list" id="home-highlights-list" aria-live="polite">
               <!-- JS rendered -->
             </div>
@@ -96,12 +102,13 @@
         <section class="home-section" data-view="agenda">
           <header class="section-header">
             <div class="section-title-wrap">
-              <h2 class="section-title">Agenda</h2>
+              <h2 class="section-title" data-i18n="agendaTitle">Agenda</h2>
             </div>
           </header>
 
           <!-- Tabs rendered via JS based on data -->
-          <div class="day-tabs" id="agenda-day-tabs" role="tablist" aria-label="Selecionar dia da agenda">
+          <div class="day-tabs" id="agenda-day-tabs" role="tablist" aria-label="Selecionar dia da agenda"
+            data-i18n-aria-label="agendaDayTabsAria">
           </div>
 
           <div class="schedule-list" id="schedule-list" aria-live="polite">
@@ -113,7 +120,7 @@
         <section class="home-section" data-view="networking">
           <header class="section-header">
             <div class="section-title-wrap">
-              <h2 class="section-title">Networking</h2>
+              <h2 class="section-title" data-i18n="networkingTitle">Networking</h2>
               <span class="networking-counter" id="networking-counter"></span>
             </div>
           </header>
@@ -121,12 +128,30 @@
           <div class="search-bar-container">
             <div class="search-input-wrapper">
               <i data-lucide="search" class="search-icon"></i>
-              <input type="text" id="networking-search" class="search-input" placeholder="Buscar participante..." />
+              <input type="text" id="networking-search" class="search-input" placeholder="Buscar participante..."
+                data-i18n-placeholder="networkingSearchPlaceholder" />
             </div>
           </div>
 
           <div class="networking-list" id="networking-list">
             <!-- JS Rendered Participants -->
+          </div>
+        </section>
+
+        <!-- ================= FOTOS SECTION ================= -->
+        <section class="home-section" data-view="fotos">
+          <header class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title" data-i18n="photosTitle">Fotos</h2>
+            </div>
+          </header>
+
+          <p class="photos-empty is-hidden" id="photos-empty" data-i18n="photosPlaceholder">
+            As fotos oficiais serão disponibilizadas nesta aba ao longo do evento.
+          </p>
+
+          <div class="photos-grid" id="photos-grid" aria-live="polite">
+            <!-- JS Rendered Photos -->
           </div>
         </section>
 
@@ -136,41 +161,47 @@
             <div class="materials-icon">
               <i data-lucide="folder-open"></i>
             </div>
-            <h2 class="materials-title">Materiais do Evento</h2>
-            <p class="materials-desc">Acesse as fotos e materiais oficiais do workshop armazenados em nossa pasta
-              oficial.</p>
+            <h2 class="materials-title" data-i18n="materialsTitle">Materiais do Evento</h2>
+            <p class="materials-desc" data-i18n="materialsDesc">Acesse as fotos e materiais oficiais do workshop
+              armazenados em nossa pasta oficial.</p>
             <button type="button" class="primary-button" id="btn-google-drive">
-              <span class="button-label">Abrir Google Drive</span>
+              <span class="button-label" data-i18n="openDrive">Abrir Google Drive</span>
               <i data-lucide="external-link"></i>
             </button>
           </div>
         </section>
 
         <!-- ================= BOTTOM NAVIGATION ================= -->
-        <nav class="bottom-nav" aria-label="Navegação principal">
+        <nav class="bottom-nav" aria-label="Navegação principal" data-i18n-aria-label="mainNavAria">
           <button class="bottom-nav-item is-active" type="button" data-view-target="home">
             <span class="bottom-nav-icon" aria-hidden="true">
               <i data-lucide="home"></i>
             </span>
-            <span class="bottom-nav-label">Home</span>
+            <span class="bottom-nav-label" data-i18n="navHome">Home</span>
           </button>
           <button class="bottom-nav-item" type="button" data-view-target="agenda">
             <span class="bottom-nav-icon" aria-hidden="true">
               <i data-lucide="calendar"></i>
             </span>
-            <span class="bottom-nav-label">Agenda</span>
+            <span class="bottom-nav-label" data-i18n="agendaTitle">Agenda</span>
           </button>
           <button class="bottom-nav-item" type="button" data-view-target="networking">
             <span class="bottom-nav-icon" aria-hidden="true">
               <i data-lucide="users"></i>
             </span>
-            <span class="bottom-nav-label">Networking</span>
+            <span class="bottom-nav-label" data-i18n="networkingTitle">Networking</span>
+          </button>
+          <button class="bottom-nav-item" type="button" data-view-target="fotos">
+            <span class="bottom-nav-icon" aria-hidden="true">
+              <i data-lucide="image"></i>
+            </span>
+            <span class="bottom-nav-label" data-i18n="navPhotos">Fotos</span>
           </button>
           <button class="bottom-nav-item" type="button" data-view-target="materiais">
             <span class="bottom-nav-icon" aria-hidden="true">
               <i data-lucide="folder"></i>
             </span>
-            <span class="bottom-nav-label">Materiais</span>
+            <span class="bottom-nav-label" data-i18n="navMaterials">Materiais</span>
           </button>
         </nav>
       </div>
@@ -181,7 +212,7 @@
       <div class="modal-content">
         <header class="modal-header">
           <h3 id="modal-title" class="modal-title"></h3>
-          <button type="button" class="modal-close" aria-label="Fechar modal">
+          <button type="button" class="modal-close" aria-label="Fechar modal" data-i18n-aria-label="closeModalAria">
             <i data-lucide="x"></i>
           </button>
         </header>

@@ -4,8 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 // Configurações do Supabase (extraídas do app.js)
-const supabaseUrl = 'https://kjwlboqqdufrkhcxjppf.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtqd2xib3FxZHVmcmtoY3hqcHBmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MzMyOTU2OCwiZXhwIjoyMDc4OTA1NTY4fQ.t30eEhmv9uVv-FEDoDKKwrgb6lfj6NUYEnTl47bydsw';
+const supabaseUrl = process.env.SUPABASE_URL || 'https://pffbpufjovqlxzogrtjl.supabase.co';
+const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmZmJwdWZqb3ZxbHh6b2dydGpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMjQyOTAsImV4cCI6MjA4ODYwMDI5MH0.kckgDcj2PR9n7xDmiVqIk19ym6zdgUfkPBUEWpl_AwI';
 const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: {
         persistSession: false
@@ -23,7 +23,7 @@ async function syncUsers() {
     const { error: deleteError } = await supabase
         .from('users')
         .delete()
-        .neq('email', 'admin@example.com'); // Deleta tudo exceto um possível admin se houver, ou apenas .neq('id', 0) para deletar tudo
+        .neq('id', 0); // Deleta tudo (inclui linhas com email NULL)
 
     if (deleteError) {
         console.error('Erro ao limpar tabela:', deleteError.message);
@@ -49,31 +49,34 @@ async function syncUsers() {
         return;
     }
 
-    console.log(`Encontrados ${participantes.length} no arquivo bruto. Deduplicando...`);
+    console.log(`Encontrados ${participantes.length} no arquivo bruto. Preparando carga...`);
 
     const uniqueParticipantes = new Map();
-    const passwordDefault = 'Sherwin2026!';
+    const passwordDefault = 'Sherwin2026@';
 
     for (const p of participantes) {
-        const email = (p.E_MAIL || '').toLowerCase().trim();
-        const nome = (p.NOME_COMP || p.__EMPTY || 'Participante').trim();
+        const rawEmail = (p.E_MAIL || '').toString().trim();
+        const email = rawEmail ? rawEmail.toLowerCase() : null;
+        const nome = (p.NOME_COMP || p.__EMPTY || 'Participante').toString().trim();
 
-        if (!email || !email.includes('@')) continue;
+        // Dedup key: prefer e-mail; fallback to a stable synthetic key so we still insert rows without e-mail.
+        const dedupKey = email && email.includes('@')
+            ? `email:${email}`
+            : `noemail:${(p['ID CLOUD'] ?? p.ID ?? p.QTD ?? nome)}`;
 
-        // Se o e-mail já existe, mantemos o primeiro encontrado (ou o que tiver mais dados se necessário)
-        if (!uniqueParticipantes.has(email)) {
-            uniqueParticipantes.set(email, {
-                email: email,
+        if (!uniqueParticipantes.has(dedupKey)) {
+            uniqueParticipantes.set(dedupKey, {
+                email: (email && email.includes('@')) ? email : null,
                 password: passwordDefault,
                 name: nome
             });
         }
     }
 
-    console.log(`Pronto para inserir ${uniqueParticipantes.size} participantes únicos.`);
+    console.log(`Pronto para inserir ${uniqueParticipantes.size} usuários.`);
 
-    for (const [email, userData] of uniqueParticipantes) {
-        console.log(`Inserindo: ${email} (${userData.name})`);
+    for (const [key, userData] of uniqueParticipantes) {
+        console.log(`Inserindo: ${userData.email || key} (${userData.name})`);
 
         const { error } = await supabase
             .from('users')

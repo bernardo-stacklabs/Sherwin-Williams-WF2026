@@ -34,16 +34,22 @@
     })();
   </script>
   <main class="app-shell">
-    <section class="app-card login-mode login-card" aria-label="Acesso ao Kick-Off Meeting Sherwin Willians">
+    <section class="app-card login-mode login-card" aria-label="Acesso ao Kick-Off Meeting Sherwin Willians" data-i18n-aria-label="loginCardAria">
       <header class="login-header">
         <div class="login-logo-container">
           <img src="./assets/logos/SW.svg" alt="Sherwin-Williams">
+        </div>
+        <div class="lang-select-center">
+          <div class="lang-toggle" role="group" aria-label="Language" data-i18n-aria-label="languageSelectAria">
+            <button type="button" class="lang-toggle-btn" data-lang="pt" aria-pressed="true">PT</button>
+            <button type="button" class="lang-toggle-btn" data-lang="en" aria-pressed="false">EN</button>
+          </div>
         </div>
       </header>
 
       <form id="login-form" class="login-form" novalidate>
         <div class="field-group">
-          <label for="email">E-mail corporativo</label>
+          <label for="email" data-i18n="loginEmailLabel">E-mail corporativo</label>
           <div class="field-with-icon">
             <span class="field-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -52,13 +58,13 @@
               </svg>
             </span>
             <input id="email" name="email" type="email" inputmode="email" autocomplete="email"
-              placeholder="seu.email@sherwin.com" required />
+              placeholder="seu.email@sherwin.com" data-i18n-placeholder="loginEmailPlaceholder" required />
           </div>
           <p class="field-error" data-error-for="email"></p>
         </div>
 
         <div class="field-group">
-          <label for="password">Senha</label>
+          <label for="password" data-i18n="loginPasswordLabel">Senha</label>
           <div class="field-with-icon password-field">
             <span class="field-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -67,7 +73,7 @@
             </span>
             <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••"
               required />
-            <button type="button" class="password-toggle" aria-label="Mostrar ou ocultar senha">
+            <button type="button" class="password-toggle" aria-label="Mostrar ou ocultar senha" data-i18n-aria-label="passwordToggleAria">
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="icon-show">
                 <path
                   d="M12 5C7 5 2.73 8.11 1 12.5 2.73 16.89 7 20 12 20s9.27-3.11 11-7.5C21.27 8.11 17 5 12 5zm0 12c-2.49 0-4.5-2.01-4.5-4.5S9.51 8 12 8s4.5 2.01 4.5 4.5S14.49 17 12 17zm0-7a2.5 2.5 0 1 0 .001 5.001A2.5 2.5 0 0 0 12 10z" />
@@ -81,21 +87,21 @@
           <p class="field-error" data-error-for="password"></p>
         </div>
 
-        <p class="helper-text">Use o e-mail cadastrado para o evento</p>
+        <p class="helper-text" data-i18n="loginHelper">Use o e-mail cadastrado para o evento</p>
 
         <button type="submit" class="primary-button">
-          <span class="button-label">Entrar</span>
+          <span class="button-label" data-i18n="loginSubmit">Entrar</span>
           <span class="button-spinner" aria-hidden="true"></span>
         </button>
 
         <button type="button" class="link-button" id="forgot-password">
-          Esqueci minha senha
+          <span data-i18n="forgotPassword">Esqueci minha senha</span>
         </button>
       </form>
 
       <form id="reset-form" class="login-form" novalidate hidden>
         <div class="field-group">
-          <label for="reset-email">E-mail corporativo</label>
+          <label for="reset-email" data-i18n="loginEmailLabel">E-mail corporativo</label>
           <div class="field-with-icon">
             <span class="field-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -104,13 +110,13 @@
               </svg>
             </span>
             <input id="reset-email" name="reset-email" type="email" inputmode="email" autocomplete="email"
-              placeholder="seu.email@sherwin.com" required />
+              placeholder="seu.email@sherwin.com" data-i18n-placeholder="loginEmailPlaceholder" required />
           </div>
           <p class="field-error" data-error-for="reset-email"></p>
         </div>
 
         <div class="field-group">
-          <label for="new-password">Nova senha</label>
+          <label for="new-password" data-i18n="resetNewPasswordLabel">Nova senha</label>
           <div class="field-with-icon">
             <span class="field-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -118,13 +124,13 @@
               </svg>
             </span>
             <input id="new-password" name="new-password" type="password" autocomplete="new-password"
-              placeholder="Digite a nova senha" required />
+              placeholder="Digite a nova senha" data-i18n-placeholder="resetNewPasswordPlaceholder" required />
           </div>
           <p class="field-error" data-error-for="new-password"></p>
         </div>
 
         <div class="field-group">
-          <label for="confirm-password">Confirmar nova senha</label>
+          <label for="confirm-password" data-i18n="resetConfirmPasswordLabel">Confirmar nova senha</label>
           <div class="field-with-icon">
             <span class="field-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -132,20 +138,20 @@
               </svg>
             </span>
             <input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password"
-              placeholder="Repita a nova senha" required />
+              placeholder="Repita a nova senha" data-i18n-placeholder="resetConfirmPasswordPlaceholder" required />
           </div>
           <p class="field-error" data-error-for="confirm-password"></p>
         </div>
 
-        <p class="helper-text">Defina uma nova senha para acessar o app.</p>
+        <p class="helper-text" data-i18n="resetHelper">Defina uma nova senha para acessar o app.</p>
 
         <button type="submit" class="primary-button" id="reset-submit">
-          <span class="button-label">Salvar nova senha</span>
+          <span class="button-label" data-i18n="resetSubmit">Salvar nova senha</span>
           <span class="button-spinner" aria-hidden="true"></span>
         </button>
 
         <button type="button" class="link-button" id="back-to-login">
-          Voltar para o login
+          <span data-i18n="backToLogin">Voltar para o login</span>
         </button>
       </form>
 
