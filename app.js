@@ -389,10 +389,57 @@ function nameKeyFirstLast(normalized) {
   return `${parts[0]} ${parts[parts.length - 1]}`;
 }
 
+function stripNameStopwords(tokens) {
+  const STOP = new Set(['DE', 'DA', 'DO', 'DAS', 'DOS', 'E']);
+  return (tokens || []).filter((t) => t && !STOP.has(t));
+}
+
+function tokenizeNormalizedName(normalized) {
+  return stripNameStopwords(String(normalized || '').split(' ').filter(Boolean));
+}
+
+function isTokenClose(a, b) {
+  const x = String(a || '').trim();
+  const y = String(b || '').trim();
+  if (!x || !y) return false;
+  if (x === y) return true;
+
+  // Prefix match helps with small filename/name suffix issues (e.g., GUARDASI vs GUARDASID)
+  const minLen = 4;
+  if ((x.length >= minLen && y.length >= minLen) && (x.startsWith(y) || y.startsWith(x))) return true;
+
+  // Small edit distance (<= 1) for common typos (e.g., LIMA vs LIMMA)
+  if (x.length < minLen || y.length < minLen) return false;
+  if (Math.abs(x.length - y.length) > 1) return false;
+
+  // One-edit-away check with early exit
+  let i = 0;
+  let j = 0;
+  let edits = 0;
+  while (i < x.length && j < y.length) {
+    if (x[i] === y[j]) {
+      i++;
+      j++;
+      continue;
+    }
+    edits++;
+    if (edits > 1) return false;
+    if (x.length > y.length) i++;
+    else if (y.length > x.length) j++;
+    else {
+      i++;
+      j++;
+    }
+  }
+  if (i < x.length || j < y.length) edits++;
+  return edits <= 1;
+}
+
 function buildPhotoIndex() {
   const list = Array.isArray(photosData) ? photosData : [];
   const byFull = new Map();
   const byFirstLast = new Map();
+  const entries = [];
 
   list.forEach((item) => {
     const rawName = String(item?.name || '').trim();
@@ -402,9 +449,12 @@ function buildPhotoIndex() {
     const firstLast = nameKeyFirstLast(normalized);
     if (normalized && !byFull.has(normalized)) byFull.set(normalized, file);
     if (firstLast && !byFirstLast.has(firstLast)) byFirstLast.set(firstLast, file);
+
+    const tokens = tokenizeNormalizedName(normalized);
+    if (normalized && file && tokens.length) entries.push({ normalized, tokens, file });
   });
 
-  return { byFull, byFirstLast };
+  return { byFull, byFirstLast, entries };
 }
 
 function getPhotoFileForPersonName(fullName) {
@@ -416,7 +466,46 @@ function getPhotoFileForPersonName(fullName) {
   if (direct) return direct;
 
   const firstLast = nameKeyFirstLast(normalized);
-  return photoIndex.byFirstLast.get(firstLast) || '';
+
+  const byFL = photoIndex.byFirstLast.get(firstLast);
+  if (byFL) return byFL;
+
+  // Fuzzy fallback: score by token overlap (handles middle names/suffixes and small typos)
+  const personTokens = tokenizeNormalizedName(normalized);
+  if (personTokens.length < 2) return '';
+
+  const firstTok = personTokens[0];
+  const lastTok = personTokens[personTokens.length - 1];
+
+  let bestFile = '';
+  let bestScore = -1;
+  let bestMatchCount = 0;
+
+  (photoIndex.entries || []).forEach((entry) => {
+    let matchCount = 0;
+    let firstMatched = false;
+    let lastMatched = false;
+
+    for (const pt of personTokens) {
+      for (const ft of entry.tokens) {
+        if (!isTokenClose(pt, ft)) continue;
+        matchCount++;
+        if (pt === firstTok) firstMatched = true;
+        if (pt === lastTok) lastMatched = true;
+        break;
+      }
+    }
+
+    if (matchCount < 2) return;
+    const score = matchCount * 10 + (firstMatched ? 2 : 0) + (lastMatched ? 2 : 0);
+    if (score > bestScore) {
+      bestScore = score;
+      bestFile = entry.file;
+      bestMatchCount = matchCount;
+    }
+  });
+
+  return bestMatchCount >= 2 ? bestFile : '';
 }
 
 function encodeFilePathSegment(file) {
@@ -626,7 +715,6 @@ function initAgenda() {
 
   // Mapeamento de tabnames de semana para data conforme pedido
   const dayToDateMap = {
-    '5ª feira': getCurrentLang() === 'en' ? 'Mar 5' : '5 de Mar',
     '2ª feira': getCurrentLang() === 'en' ? 'Mar 9' : '9 de Mar',
     '3ª feira': getCurrentLang() === 'en' ? 'Mar 10' : '10 de Mar',
     '4ª feira': getCurrentLang() === 'en' ? 'Mar 11' : '11 de Mar'
