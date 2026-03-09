@@ -4,7 +4,7 @@ import { photosData } from './assets/data/photos.js';
 import { i18n } from './locales.js';
 
 // ---- Configurações Globais ----
-const GOOGLE_DRIVE_LINK = "https://drive.google.com/drive/folders/1LXQjov_59-Q_5Xs01n-C_tBIDnFtPGGC?usp=sharing";
+const GOOGLE_DRIVE_LINK = "https://drive.google.com/drive/folders/1QLjntW5u8gsWYKsYaLikHfnjhpj8Iq3X?usp=drive_link";
 
 // Elementos da Interface
 const navItems = document.querySelectorAll('.bottom-nav-item');
@@ -566,7 +566,24 @@ function excelDateToJSDate(excelDate) {
 }
 
 function parseHoraExcel(fraction) {
-  if (typeof fraction === 'string') return fraction.replace('hs', 'h');
+  if (typeof fraction === 'string') {
+    const raw = fraction.trim();
+    if (!raw) return '';
+
+    // Normalize common PT-BR time formats:
+    // - "8hs" -> "08h"
+    // - "11:00hs" -> "11:00h"
+    // - "07:00" -> "07:00h"
+    const compact = raw.toLowerCase().replace(/\s+/g, '');
+    const m = compact.match(/^(\d{1,2})(?::(\d{2}))?(?:h|hs)?$/);
+    if (m) {
+      const hh = m[1].padStart(2, '0');
+      const mm = m[2];
+      return mm !== undefined ? `${hh}:${mm}h` : `${hh}h`;
+    }
+
+    return raw.replace(/hs\b/gi, 'h');
+  }
   if (typeof fraction !== 'number') return '';
   const totalSeconds = Math.round(fraction * 86400);
   const hours = Math.floor(totalSeconds / 3600);
@@ -609,9 +626,10 @@ function initAgenda() {
 
   // Mapeamento de tabnames de semana para data conforme pedido
   const dayToDateMap = {
-    '2ª feira': getCurrentLang() === 'en' ? 'Jan 26' : '26 de Jan',
-    '3ª feira': getCurrentLang() === 'en' ? 'Jan 27' : '27 de Jan',
-    '4ª feira': getCurrentLang() === 'en' ? 'Jan 28' : '28 de Jan'
+    '5ª feira': getCurrentLang() === 'en' ? 'Mar 5' : '5 de Mar',
+    '2ª feira': getCurrentLang() === 'en' ? 'Mar 9' : '9 de Mar',
+    '3ª feira': getCurrentLang() === 'en' ? 'Mar 10' : '10 de Mar',
+    '4ª feira': getCurrentLang() === 'en' ? 'Mar 11' : '11 de Mar'
   };
 
   // Renderiza Tabs
