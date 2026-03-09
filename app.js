@@ -4,7 +4,7 @@ import { photosData } from './assets/data/photos.js';
 import { i18n } from './locales.js';
 
 // ---- Configurações Globais ----
-const GOOGLE_DRIVE_LINK = "https://drive.google.com/drive/folders/1QLjntW5u8gsWYKsYaLikHfnjhpj8Iq3X?usp=drive_link";
+const GOOGLE_DRIVE_LINK = "https://drive.google.com/drive/folders/1LXQjov_59-Q_5Xs01n-C_tBIDnFtPGGC";
 
 // Elementos da Interface
 const navItems = document.querySelectorAll('.bottom-nav-item');
