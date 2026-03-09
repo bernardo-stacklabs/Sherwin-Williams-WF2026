@@ -941,10 +941,6 @@ function initNetworking() {
       const el = document.createElement('div');
       el.className = 'participant-card';
 
-      el.addEventListener('click', () => {
-        openParticipantProfile(p);
-      });
-
       const avatarHTML = p.photoFile
         ? `<img src="./assets/photos/${encodeFilePathSegment(p.photoFile)}" alt="${formatTemplate(t('photoAltNamed') || 'Photo of {name}', { name: p.nome })}" loading="lazy" decoding="async" />`
         : `${p.iniciais}`;
