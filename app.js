@@ -714,10 +714,14 @@ function initAgenda() {
   const dias = Object.keys(agendaAgrupada);
 
   // Mapeamento de tabnames de semana para data conforme pedido
+  const formatAgendaTabDate = (ptLabel, enLabel) => getCurrentLang() === 'en' ? enLabel : ptLabel;
   const dayToDateMap = {
-    '2ª feira': getCurrentLang() === 'en' ? 'Mar 9' : '9 de Mar',
-    '3ª feira': getCurrentLang() === 'en' ? 'Mar 10' : '10 de Mar',
-    '4ª feira': getCurrentLang() === 'en' ? 'Mar 11' : '11 de Mar'
+    '2ª feira': formatAgendaTabDate('9 de Mar', 'Mar 9'),
+    'Segunda': formatAgendaTabDate('9 de Mar', 'Mar 9'),
+    '3ª feira': formatAgendaTabDate('10 de Mar', 'Mar 10'),
+    'Terça': formatAgendaTabDate('10 de Mar', 'Mar 10'),
+    '4ª feira': formatAgendaTabDate('11 de Mar', 'Mar 11'),
+    'Quarta': formatAgendaTabDate('11 de Mar', 'Mar 11')
   };
 
   // Renderiza Tabs
